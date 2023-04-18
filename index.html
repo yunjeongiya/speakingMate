@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Speaking Mate</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<style>
+    body{
+        text-align: center;
+    }
+
+    header{
+        height: 100px;
+        padding: 20px;
+    }
+
+    article{
+        height: 450px;
+    }
+
+    .recognized-text{
+        height: 100px;
+        overflow: scroll;
+    }
+
+    footer{
+        height: 20px;
+    }
+</style>
+
+<body>
+    <header>
+        <h1 style="color:black;font-weight:bold;font-size:36px;margin-bottom:0;">Speak Mate</h1>
+        <p style="color:black;font-size:16px;">Practice for TOEFL speaking test with Recorder + Timer</p>
+    </header>
+    <hr>
+    <article>
+        <div id="content-area">
+            <div id="time-area">
+                <h2>Preparing Time</h2>
+                <input type="number" id="prepare-time-input" min="0" max="100" value="30">
+                <div id="prepare-timer" style="display: none"> </div>
+                <label for="prepare-time-input">s</label>
+
+                <h2>Speaking Time</h2>
+                <input type="number" id="speak-time-input" min="0" max="100" value="45">
+                <div id="speak-timer" style="display: none"> </div>
+                <label for="speak-time-input">s</label>
+            </div>
+
+           <div id="feedback-area" style="display : none">
+               <audio id="audio"></audio>
+               <div id="recognized-text">
+                This is test text...
+                recognized text will be shown here.
+               </div>
+           </div>
+        </div>
+
+        <br><br><br>
+
+        <div id="button-area">
+            <button id="start" type="button" style="display: inline" class="btn btn-primary">Start</button>
+            <button id="quit" type="button" style="display: none" class="btn btn-danger">Stop</button>
+            <a id="download" download="speakingMate.mp3" style="display: none" class="btn btn-success">Download</a>
+            <button id="retry" type="button" style="display: none" class="btn btn-primary">Retry</button>
+        </div>
+    </article>
+    <hr>
+    <footer>
+        <p style="font-size:12px;margin-bottom:0;">Made by <a href="https://github.com/yunjeongiya" target="_blank">yunjeongiya</a></p>
+    </footer>
+
+    <script>
+        const timeArea = document.getElementById('time-area')
+        const prepareTimeInput = document.getElementById('prepare-time-input')
+        const speakTimeInput = document.getElementById('speak-time-input')
+        const prepareTimer = document.getElementById('prepare-timer')
+        const speakTimer = document.getElementById('speak-timer')
+
+        const feedbackArea = document.getElementById('feedback-area')
+        const audio = document.getElementById('audio')
+        const recognizedText = document.getElementById('recognized-text')
+
+        const start = document.getElementById('start')
+        const quit = document.getElementById('quit')
+        const download = document.getElementById('download')
+        const retry = document.getElementById('retry')
+
+        let chunks = []
+        let mediaRecorder = null
+
+        if (!navigator.mediaDevices) {
+                console.log("getUserMedia() not supported.")
+                alert("getUserMedia() is not supported by your browser." +
+                    " If you want to record audio, please use Chrome or Firefox.")
+            }
+
+        else {
+            // TODO 함수로 하고 싶었는데, promise를 return해서 recorder를 return 하는 방법을 찾지 못함 -> promise의 콜백 공부하기
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then( stream => {
+                        mediaRecorder = new MediaRecorder(stream)
+                        console.log("MediaRecorder is prepared.")
+                        mediaRecorder.ondataavailable = e => {
+                            chunks.push(e.data)
+                        }
+                        mediaRecorder.onstop = () => { //recorder stop event handler
+                            console.log("MediaRecorder.stop() called.")
+
+                            audio.controls = true
+
+                            const blob = new Blob(chunks, {
+                                'type': 'audio/ogg codecs=opus'
+                            })
+                            chunks = []
+                            const url = URL.createObjectURL(blob)
+                            audio.src = url
+                            download.href = url
+                        }
+                    }
+                )
+                .catch(function (err) {
+                    console.log('The following gUM error occurred: ' + err)
+                })
+        }
+
+        start.addEventListener('click', () => {
+            const prepareTime = prepareTimeInput.value
+            const speakTime = speakTimeInput.value
+
+            prepareTimeInput.style.display = 'none'
+            speakTimeInput.style.display = 'none'
+            prepareTimer.style.display = 'inline'
+            speakTimer.style.display = 'inline'
+            prepareTimer.innerText = prepareTime
+            speakTimer.innerText = speakTime
+
+            start.style.display = 'none'
+            quit.style.display = 'inline'
+
+            practicing(prepareTime, speakTime)
+        })
+
+        let prepareIntervalId
+        let speakIntervalId
+
+        quit.addEventListener('click', () => {
+            clearInterval(prepareIntervalId)
+            clearInterval(speakIntervalId)
+            practiceFinished()
+        })
+
+        function practicing(prepareTime, speakTime) {
+            prepareIntervalId = setInterval(() => {
+                if(prepareTime == 0) { //TODO ===로 하면 0초로 했을 때 못 잡는 이유 찾기
+                    clearInterval(prepareIntervalId)
+                    if(mediaRecorder != null) {
+                        mediaRecorder.start()
+                        console.log(mediaRecorder.state)
+                        console.log("recorder started")
+                    }
+                    else {
+                        console.log("recorder is not prepared")
+                    }
+
+                    speakIntervalId = setInterval(() => {
+                        if(speakTime == 0) {
+                            clearInterval(speakIntervalId)
+                            practiceFinished()
+                        }
+                        else {
+                            speakTime--
+                            speakTimer.innerText = speakTime
+                        }
+                    }, 1000)
+
+                }
+                else {
+                    prepareTime--
+                    prepareTimer.innerText = prepareTime
+                }
+            }, 1000)
+        }
+
+        function practiceFinished() {
+            if (mediaRecorder != null && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop()
+                console.log(mediaRecorder.state)
+                console.log("recorder stopped")
+            }
+
+            timeArea.style.display = 'none'
+            feedbackArea.style.display = 'inline'
+
+            quit.style.display = 'none'
+            download.style.display = 'inline'
+            retry.style.display = 'inline'
+        }
+
+        retry.addEventListener('click', () => {
+            timeArea.style.display = 'inline'
+            feedbackArea.style.display = 'none'
+
+            prepareTimeInput.style.display = 'inline'
+            speakTimeInput.style.display = 'inline'
+            prepareTimer.style.display = 'none'
+            speakTimer.style.display = 'none'
+
+            start.style.display = 'inline'
+            download.style.display = 'none'
+            retry.style.display = 'none'
+        })
+    </script>
+</body>
+</html>
