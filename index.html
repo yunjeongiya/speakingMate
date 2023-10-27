@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Speaking Mate</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+    <header>
+        <h1>Speaking Mate</h1>
+        <p>Practice TOEFL speaking test with Recorder + Timer</p>
+    </header>
+    <hr>
+    <article>
+        <div id="content-area">
+            <div id="time-area">
+                <h2>Preparing Time</h2>
+                <input type="number" id="prepare-time-input" min="0" max="100" value="30">
+                <div id="prepare-timer" style="display: none"> </div>
+                <label for="prepare-time-input">s</label>
+
+                <h2>Speaking Time</h2>
+                <input type="number" id="speak-time-input" min="0" max="100" value="45">
+                <div id="speak-timer" style="display: none"> </div>
+                <label for="speak-time-input">s</label>
+            </div>
+
+           <div id="feedback-area" style="display : none">
+               <audio id="audio"></audio>
+               <div id="recognized-text">
+                This is test text...
+                recognized text will be shown here.
+               </div>
+           </div>
+        </div>
+
+        <br><br><br>
+
+        <div id="button-area">
+            <button id="start" type="button" style="display: inline" class="btn btn-primary">Start</button>
+            <button id="quit" type="button" style="display: none" class="btn btn-danger">Stop</button>
+            <a id="download" download="speakingMate.mp3" style="display: none" class="btn btn-success">Download</a>
+            <button id="retry" type="button" style="display: none" class="btn btn-primary">Retry</button>
+        </div>
+    </article>
+    <hr>
+    <footer>
+        <p> Made by <a href="https://github.com/yunjeongiya" target="_blank">yunjeongiya</a></p>
+    </footer>
+
+    <script src="./script.js"></script>
+</body>
+</html>

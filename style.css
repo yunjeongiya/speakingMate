@@ -1,0 +1,28 @@
+* {
+    text-align: center;
+}
+header{
+    color:black;
+    margin-bottom:0;
+    height: 100px;
+    padding: 20px;
+}
+header h1{
+    font-weight:bold;
+    font-size:36px;
+}
+header p{
+    font-size:16px;
+}
+article{
+    height: 450px;
+}
+.recognized-text{
+    height: 100px;
+    overflow: scroll;
+}
+footer{
+    font-size:12px;
+    margin-bottom:0;
+    height: 20px;
+}
