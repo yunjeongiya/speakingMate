@@ -79,7 +79,7 @@ quit.addEventListener('click', () => {
 
 function practicing(prepareTime, speakTime) {
     prepareIntervalId = setInterval(() => {
-        if(prepareTime == 0) { //TODO ===로 하면 0초로 했을 때 못 잡는 이유 찾기
+        if(prepareTime == 0) { //type이 다르기 때문에 ===로 비교하면 안됨
             clearInterval(prepareIntervalId)
             if(mediaRecorder != null) {
                 mediaRecorder.start()
